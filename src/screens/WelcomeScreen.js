@@ -7,15 +7,21 @@ import {
 } from "react-native-responsive-screen";
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
-import Animated from "react-native-reanimated";
 import { Image } from "react-native";
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  FadeInOut,
+  FadeInUp,
+} from "react-native-reanimated";
 
 export default function WelcomeScreen() {
+  const rndInt = Math.round(Math.random());
   const animation = useRef(null);
   const navigation = useNavigation();
   // #f64e32
   return (
-    <View className="bg-[#ffd91b] flex-1 justify-center items-center space-y-10 relative">
+    <View className="bg-[#4290de] flex-1 justify-center items-center space-y-10 relative">
       <Image
         source={require("../../assets/images/background.png")}
         style={{
@@ -34,7 +40,12 @@ export default function WelcomeScreen() {
             width: 200,
             height: 300,
           }}
-          source={require("../../assets/lottie/food-logo.json")}
+          source={
+            [
+              require("../../assets/lottie/food-logo.json"),
+              require("../../assets/lottie/food.json"),
+            ][rndInt]
+          }
         />
       </View>
 
@@ -47,7 +58,7 @@ export default function WelcomeScreen() {
           YummyRecipe
         </Text>
         <Text
-          className="text-white tracking-widest font-medium"
+          className="text-white tracking-widest font-bold"
           style={{
             fontSize: hp(2.5),
           }}
@@ -59,15 +70,17 @@ export default function WelcomeScreen() {
       {/* Get Started Button  */}
       <View>
         <TouchableOpacity
+          className="rounded-full"
           style={{
             backgroundColor: "#fff",
             paddingVertical: hp(1.5),
             paddingHorizontal: hp(2.5),
             borderRadius: hp(1.5),
           }}
-          onPress={() => navigation.navigate("Home")}
+          onPress={() => navigation.navigate("Inside")}
         >
-          <Text
+          <Animated.Text
+            entering={FadeInUp.delay(200).duration(200).springify()}
             style={{
               color: "#f64e32",
               fontSize: hp(2.2),
@@ -75,7 +88,7 @@ export default function WelcomeScreen() {
             }}
           >
             Get Started
-          </Text>
+          </Animated.Text>
         </TouchableOpacity>
       </View>
     </View>

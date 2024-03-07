@@ -1,14 +1,8 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  SafeAreaView,
-  Image,
-  TextInput,
-} from "react-native";
-import React, { useEffect, useState } from "react";
+import { View, Text, ScrollView, SafeAreaView, TextInput } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
 import {
   MagnifyingGlassIcon,
+  BackspaceIcon,
   AdjustmentsHorizontalIcon,
 } from "react-native-heroicons/outline";
 import { StatusBar } from "expo-status-bar";
@@ -16,11 +10,15 @@ import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import Categories from "../components/Categories";
 import axios from "axios";
 import Recipes from "../components/Recipes";
+import NoRecipes from "../components/NoRecipes";
+import Animated, { FadeInLeft, FadeInUp } from "react-native-reanimated";
 
 export default function HomeScreen() {
   const [activeCategory, setActiveCategory] = useState("Beef");
   const [categories, setCategories] = useState([]);
   const [meals, setMeals] = useState([]);
+  const animation = useRef(null);
+  const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     getCategories();
@@ -59,10 +57,36 @@ export default function HomeScreen() {
     }
   };
 
+  const ListRef = useRef();
+
+  const searchRecipes = (search) => {
+    if (search != "") {
+      ListRef?.current?.scrollToOffset({
+        animated: true,
+        offset: 0,
+      });
+      setMeals([
+        ...meals.filter((item) =>
+          item.strMeal.toLowerCase().includes(search.toLowerCase())
+        ),
+      ]);
+    }
+  };
+
+  const resetSearchRecipes = () => {
+    ListRef?.current?.scrollToOffset({
+      animated: true,
+      offset: 0,
+    });
+    setSearchText("");
+    setMeals([...meals]);
+    getRecipies();
+  };
+
   return (
-    <View className="flex-1 bg-[#808080 ] ">
+    <View className="flex-1 bg-[#ffffff]">
       <StatusBar style="dark" />
-      <SafeAreaView>
+      <SafeAreaView className="justify-between	">
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 50 }}
@@ -71,7 +95,8 @@ export default function HomeScreen() {
           {/* Avatar and bell icon */}
           <View className="mx-4 flex-row justify-between items-center">
             <AdjustmentsHorizontalIcon size={hp(4)} color={"gray"} />
-            <Image
+            <Animated.Image
+              entering={FadeInLeft.delay(200).duration(200).springify()}
               source={require("../../assets/images/avatar.jpg")}
               style={{ width: hp(5), height: hp(5), resizeMode: "cover" }}
               className="rounded-full"
@@ -81,36 +106,53 @@ export default function HomeScreen() {
           {/* Headlines */}
           <View className="mx-4 space-y-1 mb-2">
             <View>
-              <Text
+              <Animated.Text
+                entering={FadeInUp.delay(200).duration(200).springify()}
                 style={{ fontSize: hp(3.5) }}
                 className="font-bold text-neutral-800"
               >
                 Fast & Delicious
-              </Text>
-              <Text
+              </Animated.Text>
+              <Animated.Text
+                entering={FadeInUp.delay(400).duration(200).springify()}
                 style={{ fontSize: hp(3.5) }}
-                className="font-extrabold text-neutral-800  "
+                className="font-extrabold text-neutral-800"
               >
-                Food You <Text className="text-[#f64e32]">Love</Text>
-              </Text>
+                Food You
+                <Text className="text-[#f64e32]"> Love</Text>
+              </Animated.Text>
             </View>
           </View>
 
           {/* Search bar */}
-          <View className="mx-4 flex-row items-center border rounded-xl borderblack p-[6px]">
+          <View className="mx-4 flex-row items-center border rounded-full borderblack p-[6px]">
             <View className="bd-white rounded-full p-2">
               <MagnifyingGlassIcon
+                onPress={() => searchRecipes(searchText)}
                 size={hp(2.5)}
                 color={"gray"}
-                strokeWidth={3}
+                strokeWidth={2}
               />
             </View>
             <TextInput
               placeholder="Search your food"
               placeholderTextColor={"gray"}
               style={{ fontSize: hp(1.7) }}
-              className="flex-1 text-base mb-1 pl-1 tracking-widest"
+              className="flex-1 text-base pl-1 pr-1 tracking-widest"
+              value={searchText}
+              onChangeText={(text) => {
+                setSearchText(text);
+                searchRecipes(text);
+              }}
             />
+            <View className="bd-white rounded-full p-2">
+              <BackspaceIcon
+                onPress={() => resetSearchRecipes()}
+                size={hp(2.5)}
+                color={"gray"}
+                strokeWidth={2}
+              />
+            </View>
           </View>
 
           {/* Categories */}
@@ -126,7 +168,11 @@ export default function HomeScreen() {
 
           {/* Recipes Meal */}
           <View>
-            <Recipes meals={meals} categories={categories} />
+            {meals.length == 0 ? (
+              <NoRecipes animation={animation} />
+            ) : (
+              <Recipes meals={meals} categories={categories} />
+            )}
           </View>
         </ScrollView>
       </SafeAreaView>

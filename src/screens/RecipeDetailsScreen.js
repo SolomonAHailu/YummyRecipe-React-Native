@@ -11,6 +11,8 @@ import axios from "axios";
 import { ChevronLeftIcon } from "react-native-heroicons/outline";
 import { HeartIcon } from "react-native-heroicons/solid";
 import Loading from "../components/Loading";
+import { Favourites } from "../data/index.js";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function RecipeDetailsScreen(props) {
   let item = props.route.params;
@@ -18,12 +20,11 @@ export default function RecipeDetailsScreen(props) {
   const [meal, setMeal] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFavourite, setIsFavourite] = useState(false);
-
-  // console.log("Meal", meal);
+  const [favourites, setFavourites] = useState(Favourites);
 
   useEffect(() => {
     getMealData(item.idMeal);
-  });
+  }, []);
 
   const getMealData = async (id) => {
     try {
@@ -53,13 +54,17 @@ export default function RecipeDetailsScreen(props) {
     return indexes;
   };
 
+  const addToFavorites = async (value) => {
+    // to be done
+  };
+
   return (
     <ScrollView
       className="flex-1 bg-white"
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ paddingBottom: 30 }}
     >
-      <StatusBar style="white" />
+      <StatusBar style="dark" />
 
       {/* Recipe Image */}
       <View className="flex-row justify-center">
